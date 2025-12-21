@@ -1,0 +1,5 @@
+mkosi/mkosi.output/*
+!mkosi/mkosi.output/.gitkeep
+terraform.tfstate*
+.terraform.lock.hcl
+.terraform/

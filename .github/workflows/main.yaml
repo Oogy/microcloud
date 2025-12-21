@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Mkosi Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - name: Install build deps
+        run: |
+          sudo apt -y update
+          sudo apt -y install make mkosi debootstrap
+      - name: Build Artifacts
+        working-directory: mkosi
+        run: make
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            mkosi/mkosi.output/*
