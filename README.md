@@ -30,3 +30,7 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
     - name
     - branch/ref
     - start, stop, duration
+
+## TODO
+- [ ] Split build and release of mkosi artifacts into separate workflows or at least separate jobs.
+    - [ ] if jobs, share build output between jobs using upload-artifact action (?)

@@ -28,4 +28,4 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: |
-            mkosi/mkosi.output/*
+            mkosi/mkosi.output/*.raw
