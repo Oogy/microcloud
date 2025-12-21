@@ -8,7 +8,9 @@ on:
 jobs:
   build:
     permissions:
-      contents: read, write
+      contents:
+        - read
+        - write
     name: Build Mkosi Artifacts
     runs-on: ubuntu-latest
     steps:
