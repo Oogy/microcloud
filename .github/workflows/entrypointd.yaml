@@ -1,0 +1,17 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Entrypointd Portable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+      - name: Install build deps
+        run: |
+          sudo apt -y update
+          sudo apt -y upgrade
+          sudo apt -y install mkosi debootstrap
