@@ -2,8 +2,27 @@
 
 import datetime
 import time
+import http.client
 
 if __name__ == '__main__':
-	while True:
-		print(f"Hello @ {datetime.datetime.now()}")
-		time.sleep(1)
+    while True:
+        serial_path = '/sys/class/dmi/id/product_serial'
+        with open(serial_path, 'r') as product_serial:
+            serial = product_serial.read()
+
+        print(f"Hello from {serial} @ {datetime.datetime.now()}")
+
+        pages_host = "oogy.github.io"
+
+        conn = http.client.HTTPSConnection(pages_host)
+
+        conn.request("GET", '/microcloud/entrypointd.html', headers={"Host": pages_host})
+        entrypointd_tag = conn.getresponse().read().decode('utf-8').strip()
+
+        conn.request("GET", f"/microcloud/inventory/{serial}".strip(), headers={"Host": pages_host})
+        import_images = conn.getresponse().read().decode('utf-8').strip().split('\n')
+
+        for image in import_images:
+            name, tag = image.split(',')
+
+        time.sleep(60)
