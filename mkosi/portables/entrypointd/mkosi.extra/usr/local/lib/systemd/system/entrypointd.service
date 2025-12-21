@@ -1,0 +1,9 @@
+[Unit]
+Description=Boot Server Entrypoint
+
+[Service]
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/local/lib/entrypointd/entrypointd
+
+[Install]
+WantedBy=multi-user.target

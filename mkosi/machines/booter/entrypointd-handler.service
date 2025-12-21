@@ -1,0 +1,6 @@
+[Unit]
+Description=Start entrypointd portable
+
+[Service]
+Type=oneshot
+ExecStart=portablectl attach --enable --now entrypointd
