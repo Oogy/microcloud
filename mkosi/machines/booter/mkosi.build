@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+mkdir -p ${DESTDIR}/var/lib/portables/entrypoint.raw.v
+pushd ${DESTDIR}/var/lib/portables/entrypoint.raw.v
+wget https://github.com/Oogy/microcloud/releases/download/v0.0.10/entrypointd-v0.0.10.raw
+portablectl attach entrypointd --enable
+popd

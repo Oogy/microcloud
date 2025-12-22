@@ -1,9 +1,0 @@
-[Unit]
-Description=Await entrypointd portable service
-
-[Path]
-PathExists=/var/lib/portables/entrypointd
-Unit=entrypointd-handler.service
-
-[Install]
-WantedBy=multi-user.target

@@ -6,7 +6,7 @@
         - Native systemd integration.
         - Lighter weight, simpler, than Packer.
         - Versatile, a single build artifact can run on multiple targets.
-            - container(systemd-nspawn)
+            - container(systemd-nspawn, oci)
             - VM, on a variety of hypervisors(Virtualbox, qemu/kvm
             - Even bare metal
 
@@ -35,3 +35,9 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
 - [ ] Split build and release of mkosi artifacts into separate workflows or at least separate jobs.
     - [ ] if jobs, share build output between jobs using upload-artifact action (?)
 - [ ] Separate repo for all mkosi artifacts.
+
+## Log
+- Get entrypointd running on the booter image
+- Get entrypointd self updating
+- Then you can leave the booter machine
+- Add additional services to entrypointd

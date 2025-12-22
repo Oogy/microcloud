@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+portablectl attach entrypointd --enable
+
+systemctl disable snapd.seeded.service
+systemctl mask systemd-networkd-wait-online.service
+systemctl disable systemd-networkd-wait-online.service
