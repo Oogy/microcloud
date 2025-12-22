@@ -1,4 +1,5 @@
 SUBDIRS := $(sort $(patsubst %/,%,$(wildcard */)))
+bootable = true
 
 .PHONY: $(SUBDIRS)
 

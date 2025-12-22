@@ -17,7 +17,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt -y update
-          sudo apt -y install make debootstrap mtools python3-pefile systemd
+          sudo apt -y install make debootstrap mtools python3-pefile systemd-boot
       - name: setup-mkosi
         uses: systemd/mkosi@v26
       - name: Build Artifacts
