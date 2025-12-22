@@ -5,6 +5,7 @@ import http.client
 import ssl
 
 PAGES_HOST = 'oogy.github.io'
+GH_HOST = 'github.com'
 
 if __name__ == '__main__':
     serial_path = '/sys/class/dmi/id/product_serial'
@@ -13,10 +14,18 @@ if __name__ == '__main__':
 
     while True:
         print(f"Hello @ {datetime.datetime.now()} from {serial}")
+
         unverified_context = ssl._create_unverified_context()
-        conn = http.client.HTTPSConnection(PAGES_HOST, context=unverified_context)
-        conn.request("GET", f"/microcloud/inventory/{serial}".strip(), headers={"Host": PAGES_HOST})
-        import_images = conn.getresponse().read().decode('utf-8').strip().split('\n')
+        pages_conn = http.client.HTTPSConnection(PAGES_HOST, context=unverified_context)
+        gh_conn = http.client.HTTPSConnection(GH_HOST, context=unverified_context)
+
+        pages_conn.request("GET", f"/microcloud/inventory/{serial}".strip())
+        import_images = pages_conn.getresponse().read().decode('utf-8').strip().split('\n')
+
         for image in import_images:
-            print(f"Importing image {image}")
+            image_tag = image.split('_')[1]
+            image_path = f"/Oogy/microcloud/releases/download/v{image_tag}/{image}"
+            print(f"Importing image {image} at {GH_HOST}{image_path}")
+            gh_conn.request("GET", image_path)
+            image_data = gh_conn.getresponse().read()
         time.sleep(10)

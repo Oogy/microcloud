@@ -45,6 +45,7 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
 - [ ] refine and generalize dev.sh flow
 
 ## Scratch
+- Booter too big to fit in release artifacts. Need to get it under 2Gi.
 - seems to be a problem w/ apt cache when building on Github Runner?
     - doesn't error on individual builds. Network saturation?
 - Once entrypointd is working lets try just using dnsmasq and tftp, no matchbox.
