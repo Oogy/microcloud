@@ -2,6 +2,7 @@
 import datetime
 import time
 import http.client
+import ssl
 
 PAGES_HOST = 'oogy.github.io'
 
@@ -12,9 +13,10 @@ if __name__ == '__main__':
 
     while True:
         print(f"Hello @ {datetime.datetime.now()} from {serial}")
-        conn = http.client.HTTPSConnection(PAGES_HOST)
+        unverified_context = ssl._create_unverified_context()
+        conn = http.client.HTTPSConnection(PAGES_HOST, context=unverified_context)
         conn.request("GET", f"/microcloud/inventory/{serial}".strip(), headers={"Host": PAGES_HOST})
         import_images = conn.getresponse().read().decode('utf-8').strip().split('\n')
         for image in import_images:
-            print("Importing image {image}")
+            print(f"Importing image {image}")
         time.sleep(10)

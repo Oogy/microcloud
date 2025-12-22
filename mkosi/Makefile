@@ -20,6 +20,11 @@ $(PORTABLES):
 $(MACHINES):
 	$(MAKE) -C $@ IMAGE_VERSION=$(IMAGE_VERSION) ENTRYPOINTD_VERSION=$(ENTRYPOINTD_VERSION)
 
+
+portable:
+	$(MAKE) -C portables $(image) IMAGE_VERSION=$(IMAGE_VERSION) bootable=$(bootable)
+
+
 ifeq ($(bootable),true)
 run:
 	sudo systemd-nspawn -i mkosi.output/$(image)_$(IMAGE_VERSION).raw -b -M $(image)
