@@ -35,6 +35,7 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
     - start, stop, duration
 
 ## TODO
+- [ ] push mkosi call down to image specific makefiles?
 - [ ] Dedupe common arg patterns in Makefiles
 - [ ] Parameratize entrypointd inventory url
 - [ ] Split build and release of mkosi artifacts into separate workflows or at least separate jobs.

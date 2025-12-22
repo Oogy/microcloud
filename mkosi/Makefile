@@ -27,7 +27,7 @@ portable:
 
 ifeq ($(bootable),true)
 run:
-	sudo systemd-nspawn -i mkosi.output/$(image)_$(IMAGE_VERSION).raw -b -M $(image)
+	sudo systemd-nspawn -i mkosi.output/$(image)_$(IMAGE_VERSION).raw -b -M $(image) --capability=$(capability)
 else
 run:
 	sudo systemd-nspawn -i mkosi.output/$(image)_$(IMAGE_VERSION).raw -M $(image)
