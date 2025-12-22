@@ -1,4 +1,4 @@
-ALL := portables machines
+SUBDIRS := portables machines
 IMAGE_VERSION ?= $(shell git rev-parse --short=8 HEAD)
 
 PORTABLES := $(shell find portables -maxdepth 1 -mindepth 1  -type d)
@@ -9,21 +9,12 @@ image := booter
 
 bootble := false
 
-.PHONY: $(ALL) $(PORTABLES) $(MACHINES)
+.PHONY: all $(SUBDIRS)
 
-$(ALL):
-	$(MAKE) -C $@ IMAGE_VERSION=$(IMAGE_VERSION)
+all: $(SUBDIRS)
 
-$(PORTABLES):
-	$(MAKE) -C $@ IMAGE_VERSION=$(IMAGE_VERSION) bootable=$(bootable)
-
-$(MACHINES):
-	$(MAKE) -C $@ IMAGE_VERSION=$(IMAGE_VERSION) ENTRYPOINTD_VERSION=$(ENTRYPOINTD_VERSION)
-
-
-portable:
-	$(MAKE) -C portables $(image) IMAGE_VERSION=$(IMAGE_VERSION) bootable=$(bootable)
-
+$(SUBDIRS):
+	$(MAKE) -C $@ IMAGE_VERSION=$(IMAGE_VERSION) ENTRYPOINTD_VERSION=$(ENTRYPOINTD_VERSION) bootable=$(bootable)
 
 ifeq ($(bootable),true)
 run:

@@ -4,6 +4,8 @@ bootable ?= false
 
 .PHONY: $(SUBDIRS)
 
+all: $(SUBDIRS)
+
 $(image):
 	sudo mkosi -C $(image) -O ../../mkosi.output --image-version $(IMAGE_VERSION) --force --bootable=$(bootable)
 
