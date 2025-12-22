@@ -22,7 +22,7 @@ jobs:
         uses: systemd/mkosi@v26
       - name: Build Artifacts
         working-directory: mkosi
-        run: make
+        run: make IMAGE_VERSION=$GITHUB_REF_NAME
       - name: Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'

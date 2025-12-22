@@ -1,7 +1,8 @@
 SUBDIRS := $(sort $(patsubst %/,%,$(wildcard */)))
 
+bootable ?= false
+
 .PHONY: $(SUBDIRS)
 
 $(SUBDIRS):
-	mkosi -C $@ -O ../../mkosi.output --image-version ${GITHUB_REF_NAME}
-
+	sudo mkosi -C $@ -O ../../mkosi.output --image-version $(IMAGE_VERSION) --force --bootable=$(bootable)

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-mkdir -p /var/lib/portables/entrypointd.raw.v
-wget https://github.com/Oogy/microcloud/releases/download/v0.0.10/entrypointd-v0.0.10.raw -O /var/lib/portables/entrypointd.raw.v/entrypointd_0.0.10.raw
-
-useradd -mG sudo mcadmin -s /usr/bin/bash
-echo 'mcadmin:booter' | chpasswd
-chown -R mcadmin:mcadmin /home/mcadmin
-chmod 0755 /home/mcadmin

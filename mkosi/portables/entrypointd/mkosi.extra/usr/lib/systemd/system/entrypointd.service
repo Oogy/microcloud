@@ -1,5 +1,5 @@
 [Unit]
-Description=Boot Server Entrypoint
+Description=Booter Entrypoint
 
 [Service]
 Environment=PYTHONUNBUFFERED=1

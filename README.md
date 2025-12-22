@@ -35,14 +35,18 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
     - start, stop, duration
 
 ## TODO
+- [ ] Parameratize entrypointd inventory url
 - [ ] Split build and release of mkosi artifacts into separate workflows or at least separate jobs.
     - [ ] if jobs, share build output between jobs using upload-artifact action (?)
 - [ ] Separate repo for all mkosi artifacts.
+- [ ] support make individual images w/ type= and image= args.
+- [ ] refine and generalize dev.sh flow
 
 ## Scratch
+- Once entrypointd is working lets try just using dnsmasq and tftp, no matchbox.
+- Spent too much trime trying to decouple entrypointd from image. Just bundle for now. Once entrypointd is working it won't change frequently so don't worry about needing a new image too much.
 - need to chown the build output in postout since we're building as root now(issues w/ chown'ing the users home dir)
     - perhaps now that we've identified the login issue is with missing /bin/login we do not need the mcadmin user and can get away with autologin or rootpassword.
-- try arch again...just clone mkosi repo and execute from that
 - why can't we login on the console? Selinx or apparmor blocking root login?
     - so thi$ turned out to be missing /bin/login on the image.
     - figured out I could
@@ -53,7 +57,4 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
         Dec 22 09:01:36 mcbooter agetty[58]: pts/0: can't exec /bin/login: No such file or directory
         ```
         4. Fix with installing `login` package. Confusing that none of the metapackages install this.
-- Get entrypointd running on the booter image
-- Get entrypointd self updating
-- Then you can leave the booter machine
 - Add additional services to entrypointd
