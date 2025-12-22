@@ -23,7 +23,7 @@ jobs:
       - name: Build Artifacts
         working-directory: mkosi
         run: |
-          make IMAGE_VERSION=$(echo $GITHUB_REF_NAME | tr -d 'v')
+          make -j$(nproc) IMAGE_VERSION=$(echo $GITHUB_REF_NAME | tr -d 'v')
       - name: Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
