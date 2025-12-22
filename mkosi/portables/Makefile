@@ -6,9 +6,10 @@ bootable ?= false
 
 all: $(SUBDIRS)
 
-$(image):
-	sudo mkosi -C $(image) -O ../../mkosi.output --image-version $(IMAGE_VERSION) --force --bootable=$(bootable)
-
-
+ifeq ($(bootable), true)
 $(SUBDIRS):
-	sudo mkosi -C $@ -O ../../mkosi.output --image-version $(IMAGE_VERSION) --force --bootable=$(bootable)
+	sudo mkosi -C $@ -O ../../mkosi.output --image-version $(IMAGE_VERSION) --force --bootable
+else
+$(SUBDIRS):
+	sudo mkosi -C $@ -O ../../mkosi.output --image-version $(IMAGE_VERSION) --force
+endif
