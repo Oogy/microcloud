@@ -13,10 +13,13 @@
 ### Machine Images
 #### Booter
 All machines boot the same image. At boot, we use the kernel parameter `systemd.pull`, to import(i.e. importctl) our `entrypointd` portable service. We pull rather than embed this, so we can decouple the building of machine images from the building of `entrypointd` images.
+
 ### Portables
 #### Entrypointd
 A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manifest of additional systemd portables, sysexts, and confexts, to import and attach. The resulting url is `https://oogy.github.io/microcloud/inventory/<product_serial>`. Continuously checks for and installs updated targets(query for current release -> file, path unit+handler if file changed).
+
 #### Matchbox
+
 #### DNSMasq
 
 ### Side Quest: Git + CI/CD Server
@@ -36,7 +39,20 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
     - [ ] if jobs, share build output between jobs using upload-artifact action (?)
 - [ ] Separate repo for all mkosi artifacts.
 
-## Log
+## Scratch
+- need to chown the build output in postout since we're building as root now(issues w/ chown'ing the users home dir)
+    - perhaps now that we've identified the login issue is with missing /bin/login we do not need the mcadmin user and can get away with autologin or rootpassword.
+- try arch again...just clone mkosi repo and execute from that
+- why can't we login on the console? Selinx or apparmor blocking root login?
+    - so thi$ turned out to be missing /bin/login on the image.
+    - figured out I could
+        1. Start the images w/ vmspawn or nspawn -b for faster test loop
+        2. Force access to the running image with `machinectl shell <machine>`
+        3. journalctl -f while trying to login which showed that
+        ```
+        Dec 22 09:01:36 mcbooter agetty[58]: pts/0: can't exec /bin/login: No such file or directory
+        ```
+        4. Fix with installing `login` package. Confusing that none of the metapackages install this.
 - Get entrypointd running on the booter image
 - Get entrypointd self updating
 - Then you can leave the booter machine

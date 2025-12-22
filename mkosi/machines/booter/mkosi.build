@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-mkdir -p ${DESTDIR}/var/lib/portables/entrypointd.raw.v
-pushd ${DESTDIR}/var/lib/portables/entrypointd.raw.v
-wget https://github.com/Oogy/microcloud/releases/download/v0.0.10/entrypointd-v0.0.10.raw -O ${DESTDIR}/var/lib/portables/entrypointd.raw.v/entrypoint_0.0.10.raw
-popd

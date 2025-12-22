@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+env
+echo ${SUDO_USER}
+echo ${OUTPUTDIR}
+ls -lah ${OUTPUTDIR}
