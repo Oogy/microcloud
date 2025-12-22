@@ -46,6 +46,7 @@ A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manif
 
 ## Scratch
 - seems to be a problem w/ apt cache when building on Github Runner?
+    - doesn't error on individual builds. Network saturation?
 - Once entrypointd is working lets try just using dnsmasq and tftp, no matchbox.
 - Spent too much trime trying to decouple entrypointd from image. Just bundle for now. Once entrypointd is working it won't change frequently so don't worry about needing a new image too much.
 - need to chown the build output in postout since we're building as root now(issues w/ chown'ing the users home dir)
