@@ -12,27 +12,14 @@
 
 ### Machine Images
 #### Booter
-All machines boot the same image. At boot, we use the kernel parameter `systemd.pull`, to import(i.e. importctl) our `entrypointd` portable service. We pull rather than embed this, so we can decouple the building of machine images from the building of `entrypointd` images.
+A minimally bootable image shared by all machines based on Ubuntu Questing.
 
 ### Portables
 #### Entrypointd
-A service that gets a machine specific(`/sys/class/dmi/id/product_serial`) manifest of additional systemd portables, sysexts, and confexts, to import and attach. The resulting url is `https://oogy.github.io/microcloud/inventory/<product_serial>`. Continuously checks for and installs updated targets(query for current release -> file, path unit+handler if file changed).
-
-#### Matchbox
+This is currently embedded directly into the `booter` image. queries the host specific inventory endpoint(`oogy.github.io/microcloud/inventory/<serial>.html`) for a list of tagged systemd portable services to import and attach, achieving machine specific goals from the same image. While embedded in the image it is developed independently as a portable service, so that using a combination of `inotifywait`, and `machinectl copy-to`, we can develop the `entrypointd` script and observe behavior in real time without needing to repeatedly build the image.
 
 #### DNSMasq
-
-### Side Quest: Git + CI/CD Server
-- Git hooks = ci/cd jobs/pipelines
-- executes systemd-run transient services
-    - job config
-        - name
-        - script
-- job browser
-    - state[running, pass, fail, etc.]
-    - name
-    - branch/ref
-    - start, stop, duration
+Runs in proxy-dhcp mode and serves the `booter` machine image via TFTP to local cluster members.
 
 ## TODO
 - [ ] push mkosi call down to image specific makefiles?
