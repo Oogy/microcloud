@@ -22,6 +22,7 @@ This is currently embedded directly into the `booter` image. queries the host sp
 Runs in proxy-dhcp mode and serves the `booter` machine image via TFTP to local cluster members.
 
 ## TODO
+- [ ] Matrix strategy for separate image builds, pass artifacts to release job
 - [ ] push mkosi call down to image specific makefiles?
 - [ ] Dedupe common arg patterns in Makefiles
 - [ ] Parameratize entrypointd inventory url

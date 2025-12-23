@@ -3,6 +3,8 @@ import datetime
 import time
 import http.client
 import ssl
+from pathlib import Path
+import subprocess
 
 PAGES_HOST = 'oogy.github.io'
 GH_HOST = 'github.com'
@@ -23,9 +25,36 @@ if __name__ == '__main__':
         import_images = pages_conn.getresponse().read().decode('utf-8').strip().split('\n')
 
         for image in import_images:
-            image_tag = image.split('_')[1]
-            image_path = f"/Oogy/microcloud/releases/download/v{image_tag}/{image}"
-            print(f"Importing image {image} at {GH_HOST}{image_path}")
-            gh_conn.request("GET", image_path)
-            image_data = gh_conn.getresponse().read()
+            image_name, image_tag = image.split('_')
+
+            versioned_directory = Path(f"/var/lib/portables/{image_name}.raw.v")
+            image_path = Path(f"/var/lib/portables/{image_name}.raw.v/{image_name}_{image_tag}.raw")
+
+            image_url = f"https://{GH_HOST}/Oogy/microcloud/releases/download/v{image_tag}/{image_name}_{image_tag}.raw.xz"
+
+            if not versioned_directory.exists():
+                print(f"{versioned_directory} missing, creating")
+                versioned_directory.mkdir(parents=True)
+
+            if not image_path.exists():
+                print(f"Importing image {image} from {image_url}")
+                import_command = f"importctl pull-raw -P --verify=no {image_url}"
+
+                import_path = Path(f"/var/lib/portables/{image_name}_{image_tag}.raw")
+
+                try:
+                    subprocess.run(import_command.split(), text=True, check=True)
+                    import_path.rename(image_path)
+                except subprocess.CalledProcessError as e:
+                    print(f"Error, unable to import {image_url}: {e}")
+
+            is_attached = subprocess.run(f"portablectl is-attached {image_name}".split(), text=True, check=True, capture_output=True).stdout.strip()
+
+            if is_attached == 'attached':
+                print(f"{image_name} not attached, attaching")
+                subprocess.run(f"portablectl reattach {image_name} --enable --now --profile=trusted".split())
+            elif is_attached == 'detached':
+                print(f"{image_name} attached, reattaching")
+                subprocess.run(f"portablectl attach {image_name} --enable --now --profile=trusted".split())
+
         time.sleep(10)
