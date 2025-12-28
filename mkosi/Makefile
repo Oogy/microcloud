@@ -18,4 +18,7 @@ portables: $(PORTABLES)
 	$(MAKE) -C $@ IMAGE_VERSION=$(IMAGE_VERSION) ENTRYPOINTD_VERSION=$(ENTRYPOINTD_VERSION) bootable=$(bootable)
 
 run:
-	sudo systemd-nspawn -i mkosi.output/$(image)_$(IMAGE_VERSION).raw -b -M $(image) $(ARGS)
+	sudo systemd-nspawn -i mkosi.output/$(image)_$(IMAGE_VERSION).raw -b -M $(image)
+
+runvm:
+	sudo systemd-vmspawn -i mkosi.output/$(image)_$(IMAGE_VERSION).raw -M $(image)

@@ -32,6 +32,8 @@ if __name__ == '__main__':
 
             image_url = f"https://{GH_HOST}/Oogy/microcloud/releases/download/v{image_tag}/{image_name}_{image_tag}.raw.xz"
 
+            is_attached = subprocess.run(f"portablectl is-attached {image_name}".split(), text=True, check=True, capture_output=True).stdout.strip()
+
             if not versioned_directory.exists():
                 print(f"{versioned_directory} missing, creating")
                 versioned_directory.mkdir(parents=True)
@@ -48,13 +50,12 @@ if __name__ == '__main__':
                 except subprocess.CalledProcessError as e:
                     print(f"Error, unable to import {image_url}: {e}")
 
-            is_attached = subprocess.run(f"portablectl is-attached {image_name}".split(), text=True, check=True, capture_output=True).stdout.strip()
+                if is_attached == 'attached':
+                    print(f"{image_name} attached, reattaching")
+                    subprocess.run(f"portablectl reattach {image_name} --enable --now --profile=trusted".split())
 
-            if is_attached == 'attached':
+            if is_attached == 'detached':
                 print(f"{image_name} not attached, attaching")
-                subprocess.run(f"portablectl reattach {image_name} --enable --now --profile=trusted".split())
-            elif is_attached == 'detached':
-                print(f"{image_name} attached, reattaching")
                 subprocess.run(f"portablectl attach {image_name} --enable --now --profile=trusted".split())
 
         time.sleep(10)

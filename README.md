@@ -33,6 +33,12 @@ Runs in proxy-dhcp mode and serves the `booter` machine image via TFTP to local 
 - [ ] refine and generalize dev.sh flow
 
 ## Scratch
+- entrypointd FIX: only reattach on downloads
+- What happens if we set portables Format=portables instead of disk?
+- Why this error on portablectl attaching dnsmasq:
+```
+Dec 23 16:04:49 entrypointd portablectl[79]: AttachImage failed: No such file or directory
+```
 - Booter too big to fit in release artifacts. Need to get it under 2Gi.
 - seems to be a problem w/ apt cache when building on Github Runner?
     - doesn't error on individual builds. Network saturation?
