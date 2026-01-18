@@ -10,13 +10,22 @@ microcloud is the orchestrator for a baremetal local cloud. It manages inventory
 
 ```
 microcloud/
-├── docs/                    # GitHub Pages site
+├── bootstrap.sh            # Create/configure GitHub repos (replaces terraform)
+├── docs/                   # GitHub Pages site
 │   ├── index.html          # Landing page
 │   └── inventory/          # Machine-specific portable lists
 │       └── <serial>        # File per machine serial number
-└── terraform/              # Infrastructure as code
-    └── main.tf
 ```
+
+## Bootstrap
+
+Create all microcloud GitHub repos with `gh` CLI (no terraform needed):
+
+```bash
+./bootstrap.sh
+```
+
+This creates/configures: microcloud, booter, entrypointd-portable, dnsmasq-portable
 
 ## Related Repositories
 
@@ -29,7 +38,7 @@ microcloud/
 Machine inventory files in `docs/inventory/<serial>` determine which portables each machine runs. Format is newline-separated `<name>_<version>`:
 
 ```
-dnsmasq_0.0.11
+dnsmasq_0.0.1
 ```
 
 To add a new machine:

@@ -12,7 +12,7 @@ microcloud uses PXE boot to provision bare metal machines with a common bootable
                     │  (orchestrator) │
                     ├─────────────────┤
                     │ - inventory     │
-                    │ - terraform     │
+                    │ - bootstrap.sh  │
                     │ - docs          │
                     └────────┬────────┘
                              │
@@ -38,7 +38,7 @@ microcloud uses PXE boot to provision bare metal machines with a common bootable
 Machine-specific configuration lives in `docs/inventory/<serial>`. Each file contains newline-separated portable service names to attach:
 
 ```
-dnsmasq_0.0.11
+dnsmasq_0.0.1
 ```
 
 Served via GitHub Pages at `oogy.github.io/microcloud/inventory/<serial>`.
