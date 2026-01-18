@@ -1,5 +1,4 @@
-mkosi/mkosi.output/*
-!mkosi/mkosi.output/.gitkeep
+# Terraform
 terraform.tfstate*
 .terraform.lock.hcl
 .terraform/
