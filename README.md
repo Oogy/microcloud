@@ -12,7 +12,7 @@ microcloud uses PXE boot to provision bare metal machines with a common bootable
                     │  (orchestrator) │
                     ├─────────────────┤
                     │ - inventory     │
-                    │ - bootstrap.sh  │
+                    │ - Makefile      │
                     │ - docs          │
                     └────────┬────────┘
                              │

@@ -10,7 +10,7 @@ microcloud is the orchestrator for a baremetal local cloud. It manages inventory
 
 ```
 microcloud/
-├── bootstrap.sh            # Create/configure GitHub repos (replaces terraform)
+├── Makefile                # Create/configure GitHub repos via gh CLI
 ├── docs/                   # GitHub Pages site
 │   ├── index.html          # Landing page
 │   └── inventory/          # Machine-specific portable lists
@@ -19,13 +19,14 @@ microcloud/
 
 ## Bootstrap
 
-Create all microcloud GitHub repos with `gh` CLI (no terraform needed):
+Create all microcloud GitHub repos with `gh` CLI:
 
 ```bash
-./bootstrap.sh
+make          # Create all repos and enable Pages
+make repos    # Just create repos
+make pages    # Just enable GitHub Pages
+make booter   # Create single repo
 ```
-
-This creates/configures: microcloud, booter, entrypointd-portable, dnsmasq-portable
 
 ## Related Repositories
 
