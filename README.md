@@ -30,7 +30,7 @@ microcloud uses PXE boot to provision bare metal machines with a common bootable
 | Repo | Description |
 |------|-------------|
 | [booter](https://github.com/Oogy/booter) | Minimally bootable mkosi machine image |
-| [entrypointd](https://github.com/Oogy/entrypointd) | Portable service manager, fetches inventory |
+| [entrypointd-portable](https://github.com/Oogy/entrypointd-portable) | Portable service manager, fetches inventory |
 | [dnsmasq-portable](https://github.com/Oogy/dnsmasq-portable) | PXE/TFTP server in proxy-DHCP mode |
 
 ## Inventory

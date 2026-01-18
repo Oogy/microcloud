@@ -39,7 +39,7 @@ To add a new machine:
 
 ## How Boot Works
 
-1. Machine PXE boots, receives booter image from dnsmasq
-2. booter starts entrypointd on boot
+1. Machine PXE boots, receives booter image from dnsmasq-portable
+2. booter starts, attaches entrypointd-portable via portablectl
 3. entrypointd reads machine serial, fetches `oogy.github.io/microcloud/inventory/<serial>`
 4. entrypointd downloads and attaches listed portables via `portablectl`
