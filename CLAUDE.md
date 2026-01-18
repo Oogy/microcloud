@@ -21,7 +21,7 @@ microcloud/
 ## Related Repositories
 
 - [booter](https://github.com/Oogy/booter) - Main bootable machine image (mkosi)
-- [entrypointd](https://github.com/Oogy/entrypointd) - Portable service manager
+- [entrypointd-portable](https://github.com/Oogy/entrypointd-portable) - Portable service manager
 - [dnsmasq-portable](https://github.com/Oogy/dnsmasq-portable) - PXE/TFTP server
 
 ## Inventory Management
