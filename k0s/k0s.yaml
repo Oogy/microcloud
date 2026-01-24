@@ -1,0 +1,30 @@
+apiVersion: k0s.k0sproject.io/v1beta1
+kind: ClusterConfig
+metadata:
+  name: k0s
+spec:
+  extensions:
+    helm:
+      repositories:
+        - name: nvidia
+          url: https://helm.ngc.nvidia.com/nvidia
+        - name: csi-driver-nfs
+          url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+      charts:
+        - name: gpu-operator
+          namespace: gpu-operator
+          chartname: nvidia/gpu-operator
+          version: "v24.9.1"
+          values: |
+            driver:
+              enabled: true
+            toolkit:
+              enabled: false
+            devicePlugin:
+              enabled: true
+        - name: csi-driver-nfs
+          namespace: kube-system
+          chartname: csi-driver-nfs/csi-driver-nfs
+          version: "v4.9.0"
+          values: |
+            kubeletDir: /var/lib/k0s/kubelet

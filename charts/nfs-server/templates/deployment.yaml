@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-server
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-server
+  template:
+    metadata:
+      labels:
+        app: nfs-server
+    spec:
+      hostNetwork: true
+      imagePullSecrets:
+        - name: ghcr-secret
+      initContainers:
+        - name: init-nfs
+          image: alpine:3.21
+          command: ["/scripts/init-nfs.sh"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: host-root
+              mountPath: /host
+      containers:
+        - name: nfs-server
+          image: ghcr.io/oogy/nfs-server
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 2049
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: scripts
+          configMap:
+            name: nfs-scripts
+            defaultMode: 0755
+        - name: host-root
+          hostPath:
+            path: /
+        - name: data
+          hostPath:
+            path: /srv/nfs

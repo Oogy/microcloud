@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfs-scripts
+  namespace: {{ .Values.namespace }}
+data:
+  init-nfs.sh: |
+    #!/bin/sh
+    set -e
+
+    detect_distro() {
+        . /host/etc/os-release
+        echo "$ID"
+    }
+
+    install_arch() {
+        chroot /host pacman -Sy --noconfirm nfs-utils
+    }
+
+    install_debian() {
+        chroot /host apt-get update
+        chroot /host apt-get install -y nfs-kernel-server
+    }
+
+    install_fedora() {
+        chroot /host dnf install -y nfs-utils
+    }
+
+    install_packages() {
+        distro=$(detect_distro)
+        case "$distro" in
+            arch)  install_arch ;;
+            debian|ubuntu) install_debian ;;
+            fedora|rhel|centos) install_fedora ;;
+            *) echo "Unsupported distro: $distro"; exit 1 ;;
+        esac
+    }
+
+    load_module() {
+        chroot /host modprobe nfsd
+    }
+
+    main() {
+        install_packages
+        load_module
+        echo "NFS kernel module loaded"
+    }
+
+    main

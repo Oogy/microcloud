@@ -1,0 +1,10 @@
+iso_url_version = "latest"
+iso_url_base = "https://fastly.mirror.pkgbuild.com/images"
+iso_url_image = "Arch-Linux-x86_64-basic.qcow2"
+iso_checksum = "none"
+disk_image = true
+format = "qcow2"
+ssh_username = "arch"
+ssh_password = "arch"
+boot_wait = "1s"
+shutdown_command = "echo 'packer' | sudo -S shutdown -P now"

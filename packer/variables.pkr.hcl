@@ -1,0 +1,12 @@
+variable "iso_url_version" {}
+variable "iso_url_base" {}
+variable "iso_url_image" {}
+variable "iso_checksum" {}
+variable "output_directory" {}
+variable "disk_image" {}
+variable "format" {}
+variable "ssh_username" {}
+variable "ssh_password" {}
+variable "boot_wait" {}
+variable "shutdown_command" {}
+variable "vm_name" {}
