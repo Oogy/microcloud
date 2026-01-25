@@ -1,0 +1,6 @@
+apps:
+  - base
+  - nfs
+values:
+  hostname: rig1
+  nfs_export_path: /data

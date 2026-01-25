@@ -1,100 +1,68 @@
 # microcloud
 
-Infrastructure and orchestration for a baremetal local cloud.
+Baremetal local cloud orchestrator. Every machine runs its own k0s + ArgoCD cluster.
 
-## Architecture
-
-microcloud uses PXE boot to provision bare metal machines with a common bootable image. Each machine queries its host-specific inventory to determine which portable services to attach.
-
-```
-                    ┌─────────────────┐
-                    │   microcloud    │
-                    │  (orchestrator) │
-                    ├─────────────────┤
-                    │ - inventory     │
-                    │ - Makefile      │
-                    │ - docs (Pages)  │
-                    └────────┬────────┘
-                             │
-         ┌───────────────────┼───────────────────┐
-         │                   │                   │
-         ▼                   ▼                   ▼
-   ┌──────────┐       ┌─────────────┐    ┌────────────────┐
-   │  booter  │       │ entrypointd │    │ dnsmasq-portable│
-   │ (image)  │       │ (portable)  │    │   (portable)   │
-   └──────────┘       └─────────────┘    └────────────────┘
-```
-
-## Components
-
-| Repo | Description |
-|------|-------------|
-| [booter](https://github.com/Oogy/booter) | Minimally bootable mkosi machine image |
-| [entrypointd-portable](https://github.com/Oogy/entrypointd-portable) | Portable service manager, fetches inventory |
-| [dnsmasq-portable](https://github.com/Oogy/dnsmasq-portable) | PXE/TFTP server in proxy-DHCP mode |
-
-## Boot Flow
-
-1. **PXE Boot**: Machine network boots, dnsmasq-portable (on another machine) serves the booter image via TFTP
-2. **Kernel Boot**: booter starts with `systemd.pull=` kernel parameter that triggers systemd-import-generator
-3. **entrypointd Fetch**: systemd-import-generator downloads entrypointd-portable from GitHub releases at boot
-4. **Inventory Check**: entrypointd reads `/sys/class/dmi/id/product_serial` and fetches `oogy.github.io/microcloud/inventory/<serial>`
-5. **Portable Management**: entrypointd downloads and attaches portables listed in inventory via `portablectl attach`
-6. **Continuous Loop**: entrypointd checks every 60s for updates, self-updates first if a new version is available
-
-## Bootstrap
-
-Create all GitHub repos with the Makefile (uses `gh` CLI):
+## Install
 
 ```bash
-make          # Create all repos and enable Pages
-make repos    # Just create repos
-make pages    # Just enable GitHub Pages on microcloud
-make booter   # Create single repo
+curl -fsSL https://raw.githubusercontent.com/Oogy/microcloud/main/bootstrap/install.sh | sudo bash
 ```
 
-## Inventory
-
-Machine-specific configuration lives in `docs/inventory/<serial>`. Each file contains newline-separated portable service names to attach:
-
-```
-dnsmasq_0.0.1
+To bootstrap immediately:
+```bash
+sudo systemctl start entrypointd
 ```
 
-Format: `<name>_<version>` where:
-- `name` maps to repo `<name>-portable` (e.g., `dnsmasq` → `dnsmasq-portable`)
-- `version` maps to release tag `v<version>` (e.g., `0.0.1` → `v0.0.1`)
+## Structure
 
-Served via GitHub Pages at `oogy.github.io/microcloud/inventory/<serial>`.
+```
+microcloud/
+├── apps/
+│   ├── base/                  # Helm chart
+│   └── nfs/                   # Helm chart
+├── bootstrap/
+│   ├── install.sh
+│   ├── argocd.sh
+│   └── k0s.sh
+├── docs/
+│   └── hosts/
+│       └── <serial>.yaml      # apps + values (GitHub Pages)
+├── entrypointd/
+│   ├── entrypointd.sh
+│   └── entrypointd.service
+```
 
-### Adding a Machine
+## How It Works
+
+1. **entrypointd** gets serial, fetches host file from GitHub Pages
+2. **entrypointd** generates Application manifests from apps list
+3. **entrypointd** installs k0s + ArgoCD, applies Applications
+4. **ArgoCD** syncs apps
+
+## Hosts
+
+Host files list apps directly (served via GitHub Pages):
+
+```yaml
+# docs/hosts/S7NRCX04S394286.yaml
+apps:
+  - base
+  - nfs
+values:
+  hostname: rig1
+  nfs_export_path: /data
+```
+
+## Adding a Machine
 
 1. Get serial: `cat /sys/class/dmi/id/product_serial`
-2. Create `docs/inventory/<serial>` with desired portables
-3. Commit and push - GitHub Pages auto-deploys
+2. Create `docs/hosts/<serial>.yaml` with apps + values
+3. Commit and push
+4. Install entrypointd on the machine
 
-## Creating Releases
+## Updating Apps
 
-Each component repo has GitHub Actions that build on tag push:
-
+After changing a host's apps, re-run entrypointd:
 ```bash
-cd <repo>
-git tag v0.0.1
-git push origin v0.0.1
+sudo systemctl start entrypointd
 ```
-
-This triggers the workflow which:
-1. Builds the image with mkosi
-2. Creates a GitHub release with the `.raw.xz` artifact
-3. Creates a stable filename (e.g., `booter.raw.xz`) for `/latest/download/` URLs
-
-## Technologies
-
-- **mkosi** - systemd's image builder for reproducible OS images
-- **systemd portables** - lightweight service isolation without containers
-- **systemd.pull=** - kernel parameter (systemd 257+) for downloading portables at boot via systemd-import-generator
-- **importctl/portablectl** - systemd tools for managing portable images
-- **PXE/TFTP** - network boot for bare metal provisioning
-- **GitHub Pages** - serves machine inventory
-- **GitHub Actions** - builds images on tag push
-- **gh CLI** - GitHub CLI for repo management (replaces Terraform)

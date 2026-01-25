@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: set-hostname
+  annotations:
+    checksum/hostname: {{ .Values.hostname | sha256sum }}
+spec:
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      hostPID: true
+      hostNetwork: true
+      containers:
+        - name: set-hostname
+          image: debian:bookworm-slim
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host
+              mountPath: /host
+          command:
+            - chroot
+            - /host
+            - /bin/bash
+            - -c
+            - |
+              echo {{ .Values.hostname | quote }} > /etc/hostname
+              hostname {{ .Values.hostname | quote }}
+      volumes:
+        - name: host
+          hostPath:
+            path: /

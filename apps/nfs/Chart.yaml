@@ -1,0 +1,4 @@
+apiVersion: v2
+name: nfs
+description: NFS server setup
+version: 0.1.0

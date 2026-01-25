@@ -1,0 +1,4 @@
+apiVersion: v2
+name: base
+description: Base workloads for all nodes
+version: 0.1.0
