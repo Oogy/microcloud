@@ -50,8 +50,25 @@ bootstrap_prepare_libs
 . "$LIB_DIR/k0s.sh"
 . "$LIB_DIR/argocd.sh"
 
+bootstrap_wait_for_k0s() {
+  local tries="${K0S_READY_TRIES:-60}"
+  local delay="${K0S_READY_DELAY:-2}"
+  local i
+
+  for i in $(seq 1 "$tries"); do
+    if k0s status 2>/dev/null | grep -q "State: Running"; then
+      return 0
+    fi
+    sleep "$delay"
+  done
+
+  echo "k0s did not report State: Running after $((tries * delay))s" >&2
+  return 1
+}
+
 main() {
   k0s_bootstrap "$@"
+  bootstrap_wait_for_k0s
   argocd_install_manifest "$@"
 }
 
