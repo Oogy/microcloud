@@ -74,6 +74,14 @@ install_bootstrap_script() {
   run_sudo install -m 0755 "$src" "$dst"
 }
 
+install_libs() {
+  local lib_dir="${MICROCLOUD_LIB_DIR:-/usr/local/lib/microcloud}"
+
+  run_sudo install -d "$lib_dir"
+  run_sudo install -m 0644 "$SCRIPT_DIR/k0s.sh" "$lib_dir/k0s.sh"
+  run_sudo install -m 0644 "$SCRIPT_DIR/argocd.sh" "$lib_dir/argocd.sh"
+}
+
 main() {
   local run_now="no"
 
@@ -82,6 +90,7 @@ main() {
   fi
 
   k0s_install_binary "$@"
+  install_libs
   install_bootstrap_script
   install_systemd_unit
 
