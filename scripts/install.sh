@@ -30,8 +30,8 @@ install_prepare_sources() {
 
 install_prepare_sources
 
-. "$SCRIPT_DIR/k0s.sh"
-. "$SCRIPT_DIR/argocd.sh"
+. "$SCRIPT_DIR/lib/k0s.sh"
+. "$SCRIPT_DIR/lib/argocd.sh"
 
 run_sudo() {
   if [ "$(id -u)" -eq 0 ]; then
