@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_PATH="${BASH_SOURCE[0]-}"
 SCRIPT_DIR=""
+TMP_DIR=""
 
 install_require_cmd() {
   command -v "$1" >/dev/null 2>&1
@@ -28,22 +29,20 @@ install_fetch() {
 install_prepare_sources() {
   local repo_ref="${MICROCLOUD_REF:-main}"
   local repo_raw_base="${MICROCLOUD_RAW_BASE:-https://raw.githubusercontent.com/Oogy/microcloud}"
-  local tmp_dir
-
   if [ -n "$SCRIPT_PATH" ] && [ -f "$SCRIPT_PATH" ]; then
     SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
     return 0
   fi
 
-  tmp_dir="$(mktemp -d)"
-  trap 'rm -rf "$tmp_dir"' EXIT
+  TMP_DIR="$(mktemp -d)"
+  trap 'if [ -n "${TMP_DIR:-}" ]; then rm -rf "$TMP_DIR"; fi' EXIT
 
-  install_fetch "${repo_raw_base}/${repo_ref}/scripts/lib/k0s.sh" >"$tmp_dir/k0s.sh"
-  install_fetch "${repo_raw_base}/${repo_ref}/scripts/lib/argocd.sh" >"$tmp_dir/argocd.sh"
-  install_fetch "${repo_raw_base}/${repo_ref}/scripts/bootstrap.sh" >"$tmp_dir/bootstrap.sh"
-  install_fetch "${repo_raw_base}/${repo_ref}/scripts/systemd/microcloud-bootstrap.service" >"$tmp_dir/microcloud-bootstrap.service"
+  install_fetch "${repo_raw_base}/${repo_ref}/scripts/lib/k0s.sh" >"$TMP_DIR/k0s.sh"
+  install_fetch "${repo_raw_base}/${repo_ref}/scripts/lib/argocd.sh" >"$TMP_DIR/argocd.sh"
+  install_fetch "${repo_raw_base}/${repo_ref}/scripts/bootstrap.sh" >"$TMP_DIR/bootstrap.sh"
+  install_fetch "${repo_raw_base}/${repo_ref}/scripts/systemd/microcloud-bootstrap.service" >"$TMP_DIR/microcloud-bootstrap.service"
 
-  SCRIPT_DIR="$tmp_dir"
+  SCRIPT_DIR="$TMP_DIR"
 }
 
 install_prepare_sources
@@ -87,7 +86,7 @@ main() {
   install_systemd_unit
 
   if [ "$run_now" = "yes" ]; then
-    "$SCRIPT_DIR/bootstrap.sh"
+    run_sudo /usr/local/bin/microcloud-bootstrap
   fi
 }
 
