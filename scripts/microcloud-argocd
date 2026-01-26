@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ARGOCD_MANIFEST_URL="https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+KUBECTL_TIMEOUT="5s"
+WAIT_RETRIES=60
+WAIT_SLEEP_SECONDS=5
+
+ensure_root() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "error: run as root" >&2
+    exit 1
+  fi
+}
+
+wait_for_api() {
+  local attempt=1
+  while [[ "${attempt}" -le "${WAIT_RETRIES}" ]]; do
+    if k0s kubectl version --request-timeout="${KUBECTL_TIMEOUT}" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep "${WAIT_SLEEP_SECONDS}"
+    attempt=$((attempt + 1))
+  done
+
+  echo "error: kube api not responding after $((WAIT_RETRIES * WAIT_SLEEP_SECONDS)) seconds" >&2
+  return 1
+}
+
+apply_argocd_manifest() {
+  k0s kubectl apply -f "${ARGOCD_MANIFEST_URL}"
+}
+
+mark_complete() {
+  mkdir -p /var/lib/microcloud
+  touch /var/lib/microcloud/argocd.done
+  systemctl daemon-reload
+  systemctl enable --now microcloud-argocd.target
+}
+
+main() {
+  ensure_root
+
+  if [[ -f /var/lib/microcloud/argocd.done ]]; then
+    exit 0
+  fi
+
+  wait_for_api
+  apply_argocd_manifest
+  mark_complete
+}
+
+main "$@"

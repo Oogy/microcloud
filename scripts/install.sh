@@ -78,6 +78,41 @@ WantedBy=multi-user.target
 EOF
 }
 
+install_microcloud_argocd_script() {
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  install -m 0755 "${script_dir}/microcloud-argocd" /usr/local/bin/microcloud-argocd
+}
+
+install_microcloud_argocd_service() {
+  cat > /etc/systemd/system/microcloud-argocd.service <<'EOF'
+[Unit]
+Description=Microcloud Argo CD install
+ConditionPathExists=!/var/lib/microcloud/argocd.done
+After=network-online.target microcloud-k8s.target
+Wants=network-online.target microcloud-k8s.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/microcloud-argocd
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+install_microcloud_argocd_target() {
+  cat > /etc/systemd/system/microcloud-argocd.target <<'EOF'
+[Unit]
+Description=Microcloud Argo CD install complete
+ConditionPathExists=/var/lib/microcloud/argocd.done
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
 reload_systemd() {
   systemctl daemon-reload
 }
@@ -85,6 +120,7 @@ reload_systemd() {
 enable_service() {
   systemctl enable microcloud-host.service
   systemctl enable microcloud-k8s.service
+  systemctl enable microcloud-argocd.service
 }
 
 main() {
@@ -95,6 +131,9 @@ main() {
   install_microcloud_k8s_script
   install_microcloud_k8s_service
   install_microcloud_k8s_target
+  install_microcloud_argocd_script
+  install_microcloud_argocd_service
+  install_microcloud_argocd_target
   reload_systemd
   enable_service
 }
