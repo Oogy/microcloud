@@ -138,6 +138,11 @@ autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
+
+hostname: ""
+hostnameCron:
+  schedule: "*/15 * * * *"
+  image: "alpine:3.19"
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
