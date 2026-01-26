@@ -1,0 +1,8 @@
+apps:
+  - name: base
+    values:
+      hostname: tiny
+  #- name: nfs
+  #  values:
+  #    exports:
+  #      - /data
