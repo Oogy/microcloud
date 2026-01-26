@@ -43,12 +43,48 @@ WantedBy=multi-user.target
 EOF
 }
 
+install_microcloud_k8s_script() {
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  install -m 0755 "${script_dir}/microcloud-k8s" /usr/local/bin/microcloud-k8s
+}
+
+install_microcloud_k8s_service() {
+  cat > /etc/systemd/system/microcloud-k8s.service <<'EOF'
+[Unit]
+Description=Microcloud k0s bootstrap
+ConditionPathExists=!/var/lib/microcloud/k8s.done
+After=network-online.target microcloud-host.target
+Wants=network-online.target microcloud-host.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/microcloud-k8s
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+install_microcloud_k8s_target() {
+  cat > /etc/systemd/system/microcloud-k8s.target <<'EOF'
+[Unit]
+Description=Microcloud k0s bootstrap complete
+ConditionPathExists=/var/lib/microcloud/k8s.done
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
 reload_systemd() {
   systemctl daemon-reload
 }
 
 enable_service() {
   systemctl enable microcloud-host.service
+  systemctl enable microcloud-k8s.service
 }
 
 main() {
@@ -56,6 +92,9 @@ main() {
   install_microcloud_host_script
   install_microcloud_host_service
   install_microcloud_host_target
+  install_microcloud_k8s_script
+  install_microcloud_k8s_service
+  install_microcloud_k8s_target
   reload_systemd
   enable_service
 }

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ensure_root() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "error: run as root" >&2
+    exit 1
+  fi
+}
+
+install_k0s_binary() {
+  if command -v k0s >/dev/null 2>&1; then
+    return 0
+  fi
+
+  curl -fsSL https://get.k0s.sh | sh
+}
+
+install_k0s_controller() {
+  if [[ -f /etc/systemd/system/k0scontroller.service ]]; then
+    return 0
+  fi
+
+  k0s install controller --single
+}
+
+start_k0s_controller() {
+  systemctl enable --now k0scontroller
+}
+
+mark_complete() {
+  mkdir -p /var/lib/microcloud
+  touch /var/lib/microcloud/k8s.done
+  systemctl daemon-reload
+  systemctl enable --now microcloud-k8s.target
+}
+
+main() {
+  ensure_root
+
+  if [[ -f /var/lib/microcloud/k8s.done ]]; then
+    exit 0
+  fi
+
+  install_k0s_binary
+  install_k0s_controller
+  start_k0s_controller
+  mark_complete
+}
+
+main "$@"
