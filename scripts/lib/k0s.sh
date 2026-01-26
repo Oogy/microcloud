@@ -47,6 +47,11 @@ k0s_install_binary() {
 
 k0s_bootstrap() {
   k0s_install_binary
+  if [ -f /etc/systemd/system/k0scontroller.service ] || k0s_run_sudo k0s status >/dev/null 2>&1; then
+    k0s_run_sudo k0s start
+    return 0
+  fi
+
   k0s_run_sudo k0s install controller --single --enable-worker
   k0s_run_sudo k0s start
 }
