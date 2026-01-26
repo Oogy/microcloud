@@ -1,6 +1,7 @@
 apps:
   - base
-  - nfs
+  #- nfs
 values:
-  hostname: rig1
-  nfs_export_path: /data
+  hostname: sidearm
+  #exports:
+    #- /data

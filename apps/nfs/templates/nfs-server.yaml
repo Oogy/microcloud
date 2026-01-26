@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: nfs
-data:
-  export_path: {{ .Values.nfs_export_path | quote }}
