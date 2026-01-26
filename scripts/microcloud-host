@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+is_raspberry_pi() {
+  if [[ -r /proc/device-tree/model ]]; then
+    local model
+    model="$(tr -d '\0' </proc/device-tree/model)"
+    [[ "${model}" == *"Raspberry Pi"* ]]
+    return $?
+  fi
+  return 1
+}
+
+read_cmdline() {
+  cat /boot/firmware/cmdline.txt
+}
+
+cmdline_has_token() {
+  local token="$1"
+  local cmdline="$2"
+  grep -qw "${token}" <<<"${cmdline}"
+}
+
+enable_cgroup_memory() {
+  local cmdline
+  cmdline="$(read_cmdline)"
+
+  if ! cmdline_has_token "cgroup_enable=memory" "${cmdline}"; then
+    cmdline="${cmdline} cgroup_enable=memory"
+  fi
+  if ! cmdline_has_token "cgroup_memory=1" "${cmdline}"; then
+    cmdline="${cmdline} cgroup_memory=1"
+  fi
+
+  echo "${cmdline}" > /boot/firmware/cmdline.txt
+}
+
+mark_complete() {
+  mkdir -p /var/lib/microcloud
+  touch /var/lib/microcloud/host.done
+  systemctl daemon-reload
+  systemctl enable --now microcloud-host.target
+}
+
+main() {
+  if [[ -f /var/lib/microcloud/host.done ]]; then
+    exit 0
+  fi
+
+  if ! is_raspberry_pi; then
+    mark_complete
+    exit 0
+  fi
+
+  if [[ ! -r /boot/firmware/cmdline.txt ]]; then
+    echo "error: /boot/firmware/cmdline.txt not readable" >&2
+    exit 1
+  fi
+
+  local cmdline
+  cmdline="$(read_cmdline)"
+
+  if cmdline_has_token "cgroup_enable=memory" "${cmdline}" && cmdline_has_token "cgroup_memory=1" "${cmdline}"; then
+    mark_complete
+    exit 0
+  fi
+
+  enable_cgroup_memory
+  systemctl reboot
+}
+
+main "$@"
