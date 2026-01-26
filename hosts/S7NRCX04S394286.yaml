@@ -1,0 +1,8 @@
+apps:
+  - name: base
+    values:
+      hostname: sidearm
+  #- name: nfs
+  #  values:
+  #    exports:
+  #      - /data

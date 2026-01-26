@@ -1,7 +1,0 @@
-apps:
-  - base
-  #- nfs
-values:
-  hostname: sidearm
-  #exports:
-    #- /data
