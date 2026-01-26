@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+K0S_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -f "$K0S_LIB_DIR/system.sh" ]; then
+  . "$K0S_LIB_DIR/system.sh"
+fi
+
 k0s_require_cmd() {
   command -v "$1" >/dev/null 2>&1
 }
@@ -56,7 +62,11 @@ k0s_bootstrap() {
     return 0
   fi
 
-  k0s_run_sudo k0s install controller --single --enable-worker
+  if command -v system_is_raspberry_pi >/dev/null 2>&1 && system_is_raspberry_pi; then
+    k0s_run_sudo k0s install controller --single --enable-worker --ignore-pre-flight-checks
+  else
+    k0s_run_sudo k0s install controller --single --enable-worker
+  fi
   k0s_run_sudo k0s start
 }
 

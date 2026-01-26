@@ -63,6 +63,7 @@ install_libs() {
   run_sudo install -d "$lib_dir"
   run_sudo install -m 0644 "$SCRIPT_DIR/lib/k0s.sh" "$lib_dir/k0s.sh"
   run_sudo install -m 0644 "$SCRIPT_DIR/lib/argocd.sh" "$lib_dir/argocd.sh"
+  run_sudo install -m 0644 "$SCRIPT_DIR/lib/system.sh" "$lib_dir/system.sh"
 }
 
 main() {
