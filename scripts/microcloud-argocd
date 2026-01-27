@@ -28,7 +28,8 @@ wait_for_api() {
 }
 
 apply_argocd_manifest() {
-  k0s kubectl apply -f "${ARGOCD_MANIFEST_URL}"
+  k0s kubectl create namespace argocd --dry-run=client -o yaml | k0s kubectl apply -f -
+  k0s kubectl apply -n argocd -f "${ARGOCD_MANIFEST_URL}"
 }
 
 mark_complete() {
