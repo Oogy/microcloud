@@ -50,6 +50,7 @@ remove_done_files() {
 
 remove_argocd() {
   if command -v k0s >/dev/null 2>&1; then
+    try_run k0s kubectl delete -f "${ARGOCD_MANIFEST_URL}"
     try_run k0s kubectl delete -n argocd -f "${ARGOCD_MANIFEST_URL}"
     try_run k0s kubectl delete namespace argocd
   fi
@@ -58,9 +59,14 @@ remove_argocd() {
 stop_and_reset_k0s() {
   if command -v k0s >/dev/null 2>&1; then
     try_run systemctl disable --now k0scontroller.service
+    try_run systemctl disable --now k0sworker.service
     try_run k0s stop
     try_run k0s reset --force
   fi
+}
+
+remove_k0s_data() {
+  rm -rf /var/lib/k0s /etc/k0s /var/log/k0s
 }
 
 remove_binaries() {
@@ -76,6 +82,7 @@ main() {
   stop_and_reset_k0s
   remove_microcloud_units
   remove_done_files
+  remove_k0s_data
   remove_binaries
 }
 
