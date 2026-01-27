@@ -119,8 +119,8 @@ spec:
               files:
                 - path: hosts/${serial}.yaml
           - list:
-              elements:
-{{ toYaml .apps | nindent 16 }}
+              elementsYaml: |
+                {{ toYaml .apps }}
   template:
     metadata:
       name: '{{ .name }}'
