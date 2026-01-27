@@ -4,7 +4,7 @@ set -euo pipefail
 run_install() {
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  "${script_dir}/scripts/install.sh"
+  "${script_dir}/scripts/install.sh" "$@"
 }
 
 main() {

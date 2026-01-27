@@ -123,8 +123,31 @@ enable_service() {
   systemctl enable microcloud-argocd.service
 }
 
+start_services_now() {
+  systemctl start microcloud-host.service
+  systemctl start microcloud-k8s.service
+  systemctl start microcloud-argocd.service
+}
+
+parse_args() {
+  START_NOW=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --now)
+        START_NOW=1
+        shift
+        ;;
+      *)
+        echo "usage: $0 [--now]" >&2
+        exit 2
+        ;;
+    esac
+  done
+}
+
 main() {
   ensure_root
+  parse_args "$@"
   install_microcloud_host_script
   install_microcloud_host_service
   install_microcloud_host_target
@@ -136,6 +159,9 @@ main() {
   install_microcloud_argocd_target
   reload_systemd
   enable_service
+  if [[ "${START_NOW}" -eq 1 ]]; then
+    start_services_now
+  fi
 }
 
 main "$@"
