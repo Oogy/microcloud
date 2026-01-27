@@ -119,7 +119,7 @@ spec:
               files:
                 - path: hosts/${serial}.yaml
           - list:
-              elements: {{ toJson .apps }}
+              elementsYaml: '{{ toJson .apps }}'
   template:
     metadata:
       name: '{{ .name }}'
