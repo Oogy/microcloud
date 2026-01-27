@@ -1,7 +1,7 @@
+hostname: tiny
 apps:
   - name: base
-    values:
-      hostname: tiny
+    values: {}
   #- name: nfs
   #  values:
   #    exports:

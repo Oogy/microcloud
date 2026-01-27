@@ -1,7 +1,7 @@
+hostname: sidearm
 apps:
   - name: base
-    values:
-      hostname: sidearm
+    values: {}
   #- name: nfs
   #  values:
   #    exports:

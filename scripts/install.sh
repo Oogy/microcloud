@@ -43,6 +43,13 @@ WantedBy=multi-user.target
 EOF
 }
 
+install_hosts_data() {
+  local repo_root
+  repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  mkdir -p /usr/local/share/microcloud/hosts
+  cp -f "${repo_root}/hosts/"*.yaml /usr/local/share/microcloud/hosts/
+}
+
 install_microcloud_k8s_script() {
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -188,6 +195,7 @@ main() {
   install_microcloud_host_script
   install_microcloud_host_service
   install_microcloud_host_target
+  install_hosts_data
   install_microcloud_k8s_script
   install_microcloud_k8s_service
   install_microcloud_k8s_target

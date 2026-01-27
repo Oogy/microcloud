@@ -85,6 +85,10 @@ remove_binaries() {
   rm -f /usr/local/bin/k0s
 }
 
+remove_host_data() {
+  rm -rf /usr/local/share/microcloud
+}
+
 main() {
   ensure_root
   remove_argocd
@@ -93,6 +97,7 @@ main() {
   remove_done_files
   remove_k0s_data
   remove_binaries
+  remove_host_data
 }
 
 main "$@"
