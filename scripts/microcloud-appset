@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_URL="https://github.com/Oogy/microcloud.git"
+REPO_REV="main"
+NAMESPACE="microcloud"
+WAIT_RETRIES=60
+WAIT_SLEEP_SECONDS=5
+KUBECTL_TIMEOUT="5s"
+
+ensure_root() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "error: run as root" >&2
+    exit 1
+  fi
+}
+
+is_raspberry_pi() {
+  if [[ -r /proc/device-tree/model ]]; then
+    local model
+    model="$(tr -d '\0' </proc/device-tree/model)"
+    [[ "${model}" == *"Raspberry Pi"* ]]
+    return $?
+  fi
+  return 1
+}
+
+get_dmi_serial() {
+  if [[ -r /sys/class/dmi/id/product_serial ]]; then
+    tr -d '\0' </sys/class/dmi/id/product_serial
+    return 0
+  fi
+  if command -v dmidecode >/dev/null 2>&1; then
+    dmidecode -s system-serial-number 2>/dev/null | head -n 1
+    return 0
+  fi
+  return 1
+}
+
+get_pi_serial() {
+  if [[ -r /proc/device-tree/serial-number ]]; then
+    tr -d '\0' </proc/device-tree/serial-number
+    return 0
+  fi
+  if [[ -r /proc/cpuinfo ]]; then
+    awk -F': ' '/^Serial/ {print $2; exit}' /proc/cpuinfo
+    return 0
+  fi
+  return 1
+}
+
+get_device_serial() {
+  local serial=""
+  if is_raspberry_pi; then
+    serial="$(get_pi_serial || true)"
+  else
+    serial="$(get_dmi_serial || true)"
+  fi
+
+  serial="$(echo "${serial}" | tr -d '[:space:]')"
+  if [[ -z "${serial}" || "${serial}" == "None" || "${serial}" == "Unknown" ]]; then
+    echo "error: unable to determine device serial" >&2
+    exit 1
+  fi
+
+  echo "${serial}"
+}
+
+wait_for_api() {
+  local attempt=1
+  while [[ "${attempt}" -le "${WAIT_RETRIES}" ]]; do
+    if k0s kubectl version --request-timeout="${KUBECTL_TIMEOUT}" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep "${WAIT_SLEEP_SECONDS}"
+    attempt=$((attempt + 1))
+  done
+
+  echo "error: kube api not responding after $((WAIT_RETRIES * WAIT_SLEEP_SECONDS)) seconds" >&2
+  return 1
+}
+
+wait_for_appset_crd() {
+  local attempt=1
+  while [[ "${attempt}" -le "${WAIT_RETRIES}" ]]; do
+    if k0s kubectl get crd applicationsets.argoproj.io >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep "${WAIT_SLEEP_SECONDS}"
+    attempt=$((attempt + 1))
+  done
+
+  echo "error: applicationset crd not available after $((WAIT_RETRIES * WAIT_SLEEP_SECONDS)) seconds" >&2
+  return 1
+}
+
+ensure_namespace() {
+  k0s kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | k0s kubectl apply -f -
+}
+
+apply_appset() {
+  local serial="$1"
+  cat <<EOF | k0s kubectl apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: microcloud
+  namespace: ${NAMESPACE}
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: ${REPO_URL}
+              revision: ${REPO_REV}
+              files:
+                - path: hosts/${serial}.yaml
+          - list:
+              elements:
+{{ toYaml .apps | nindent 16 }}
+  template:
+    metadata:
+      name: '{{ .name }}'
+    spec:
+      project: default
+      source:
+        repoURL: ${REPO_URL}
+        targetRevision: ${REPO_REV}
+        path: apps/{{ .name }}
+        helm:
+          values: |
+{{ toYaml .values | nindent 12 }}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: ${NAMESPACE}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+EOF
+}
+
+mark_complete() {
+  mkdir -p /var/lib/microcloud
+  touch /var/lib/microcloud/appset.done
+  systemctl daemon-reload
+  systemctl enable --now microcloud-appset.target
+}
+
+main() {
+  ensure_root
+
+  if [[ -f /var/lib/microcloud/appset.done ]]; then
+    exit 0
+  fi
+
+  local serial
+  serial="$(get_device_serial)"
+
+  wait_for_api
+  wait_for_appset_crd
+  ensure_namespace
+  apply_appset "${serial}"
+  mark_complete
+}
+
+main "$@"

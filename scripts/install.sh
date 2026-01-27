@@ -113,6 +113,41 @@ WantedBy=multi-user.target
 EOF
 }
 
+install_microcloud_appset_script() {
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  install -m 0755 "${script_dir}/microcloud-appset" /usr/local/bin/microcloud-appset
+}
+
+install_microcloud_appset_service() {
+  cat > /etc/systemd/system/microcloud-appset.service <<'EOF'
+[Unit]
+Description=Microcloud ApplicationSet install
+ConditionPathExists=!/var/lib/microcloud/appset.done
+After=network-online.target microcloud-argocd.target
+Wants=network-online.target microcloud-argocd.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/microcloud-appset
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+install_microcloud_appset_target() {
+  cat > /etc/systemd/system/microcloud-appset.target <<'EOF'
+[Unit]
+Description=Microcloud ApplicationSet install complete
+ConditionPathExists=/var/lib/microcloud/appset.done
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
 reload_systemd() {
   systemctl daemon-reload
 }
@@ -121,6 +156,7 @@ enable_service() {
   systemctl enable microcloud-host.service
   systemctl enable microcloud-k8s.service
   systemctl enable microcloud-argocd.service
+  systemctl enable microcloud-appset.service
 }
 
 start_services_now() {
@@ -157,6 +193,9 @@ main() {
   install_microcloud_argocd_script
   install_microcloud_argocd_service
   install_microcloud_argocd_target
+  install_microcloud_appset_script
+  install_microcloud_appset_service
+  install_microcloud_appset_target
   reload_systemd
   enable_service
   if [[ "${START_NOW}" -eq 1 ]]; then

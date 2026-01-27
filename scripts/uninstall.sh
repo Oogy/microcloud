@@ -25,16 +25,20 @@ remove_unit() {
 }
 
 remove_microcloud_units() {
+  stop_disable_unit microcloud-appset.service
   stop_disable_unit microcloud-argocd.service
   stop_disable_unit microcloud-k8s.service
   stop_disable_unit microcloud-host.service
+  stop_disable_unit microcloud-appset.target
   stop_disable_unit microcloud-argocd.target
   stop_disable_unit microcloud-k8s.target
   stop_disable_unit microcloud-host.target
 
+  remove_unit microcloud-appset.service
   remove_unit microcloud-argocd.service
   remove_unit microcloud-k8s.service
   remove_unit microcloud-host.service
+  remove_unit microcloud-appset.target
   remove_unit microcloud-argocd.target
   remove_unit microcloud-k8s.target
   remove_unit microcloud-host.target
@@ -42,6 +46,7 @@ remove_microcloud_units() {
 }
 
 remove_done_files() {
+  rm -f /var/lib/microcloud/appset.done
   rm -f /var/lib/microcloud/argocd.done
   rm -f /var/lib/microcloud/k8s.done
   rm -f /var/lib/microcloud/host.done
@@ -50,6 +55,8 @@ remove_done_files() {
 
 remove_argocd() {
   if command -v k0s >/dev/null 2>&1; then
+    try_run k0s kubectl delete -n microcloud applicationset microcloud
+    try_run k0s kubectl delete namespace microcloud
     try_run k0s kubectl delete -f "${ARGOCD_MANIFEST_URL}"
     try_run k0s kubectl delete -n argocd -f "${ARGOCD_MANIFEST_URL}"
     try_run k0s kubectl delete namespace argocd
@@ -73,6 +80,7 @@ remove_binaries() {
   rm -f /usr/local/bin/microcloud-host
   rm -f /usr/local/bin/microcloud-k8s
   rm -f /usr/local/bin/microcloud-argocd
+  rm -f /usr/local/bin/microcloud-appset
   rm -f /usr/local/bin/k0s
 }
 
