@@ -163,6 +163,7 @@ start_services_now() {
   systemctl start microcloud-host.service
   systemctl start microcloud-k8s.service
   systemctl start microcloud-argocd.service
+  systemctl start microcloud-appset.service
 }
 
 parse_args() {
