@@ -3,7 +3,8 @@ set -euo pipefail
 
 REPO_URL="https://github.com/Oogy/microcloud.git"
 REPO_REV="main"
-NAMESPACE="microcloud"
+APPSET_NAMESPACE="argocd"
+APPS_NAMESPACE="microcloud"
 WAIT_RETRIES=60
 WAIT_SLEEP_SECONDS=5
 KUBECTL_TIMEOUT="5s"
@@ -95,7 +96,7 @@ wait_for_appset_crd() {
 }
 
 ensure_namespace() {
-  k0s kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | k0s kubectl apply -f -
+  k0s kubectl create namespace "${APPS_NAMESPACE}" --dry-run=client -o yaml | k0s kubectl apply -f -
 }
 
 apply_appset() {
@@ -105,7 +106,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: microcloud
-  namespace: ${NAMESPACE}
+  namespace: ${APPSET_NAMESPACE}
 spec:
   goTemplate: true
   goTemplateOptions:
@@ -134,7 +135,7 @@ spec:
             {{ toYaml .values | nindent 12 }}
       destination:
         server: https://kubernetes.default.svc
-        namespace: ${NAMESPACE}
+        namespace: ${APPS_NAMESPACE}
       syncPolicy:
         automated:
           prune: true

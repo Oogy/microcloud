@@ -55,7 +55,7 @@ remove_done_files() {
 
 remove_argocd() {
   if command -v k0s >/dev/null 2>&1; then
-    try_run k0s kubectl delete -n microcloud applicationset microcloud
+    try_run k0s kubectl delete -n argocd applicationset microcloud
     try_run k0s kubectl delete namespace microcloud
     try_run k0s kubectl delete -f "${ARGOCD_MANIFEST_URL}"
     try_run k0s kubectl delete -n argocd -f "${ARGOCD_MANIFEST_URL}"
