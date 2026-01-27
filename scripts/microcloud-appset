@@ -131,7 +131,7 @@ spec:
         path: apps/{{ .name }}
         helm:
           values: |
-{{ toYaml .values | nindent 12 }}
+            {{ toYaml .values | nindent 12 }}
       destination:
         server: https://kubernetes.default.svc
         namespace: ${NAMESPACE}
