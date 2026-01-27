@@ -68,6 +68,7 @@ stop_and_reset_k0s() {
     try_run systemctl disable --now k0scontroller.service
     try_run systemctl disable --now k0sworker.service
     try_run k0s stop
+    try_run rm -rf /var/lib/k0s
     try_run k0s reset --force
   fi
 }
