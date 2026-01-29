@@ -162,7 +162,7 @@ affinity: {}
 
 nfsSetup:
   enabled: false
-  namespace: ""
+  namespace: microcloud
   image: alpine:3.19
   user: nfs
   group: nfs
