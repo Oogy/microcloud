@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfs-setup
+  namespace: microcloud
+data:
+  nfs.sh: |
+    #!/usr/bin/env bash
+
+    set -x
+
+    sudo apt -y install nfs-kernel-server nfs-common rpcbind
+
+    if systemctl is-active nfs-kernel-server -q; then
+      sudo systemctl stop nfs-kernel-server.service
+    fi
+
+    if systemctl is-active rpcbind.service -q; then
+      sudo systemctl stop rpcbind.service
+    fi
+
+    if systemctl is-active rpcbind.socket -q; then
+      sudo systemctl stop rpcbind.socket
+    fi
+
+    if [ "$(systemctl is-enabled rpcbind.service)" != "masked" ]; then
+      sudo systemctl mask rpcbind.service
+    fi
+
+    if [ $(systemctl is-enabled rpcbind.socket) != "masked" ]; then
+      sudo systemctl mask rpcbind.socket
+    fi
+
+    if [ ! -f /etc/nfs.conf.d/redcloud.conf ]; then
+      sudo -E tee /etc/nfs.conf.d/redcloud.conf <<-EOF
+	[nfsd]
+	vers3=n
+	host=127.0.0.1
+
+	[mountd]
+	manage-gids=y
+	port=42069
+	EOF
+    fi
+
+    if ! id redcloud; then
+      sudo useradd redcloud
+    fi
+
+    if [ ! -d /opt/redcloud/data ]; then
+      sudo mkdir -p /opt/redcloud/data
+      sudo chown -R redcloud:redcloud /opt/redcloud
+    fi
+
+    if [ ! -d /mnt/redcloud/data ]; then
+      sudo mkdir -p /mnt/redcloud/data
+      sudo chown -R redcloud:redcloud /mnt/redcloud
+    fi
+
+    if ! grep -q "/opt/redcloud/data" /etc/exports; then
+      sudo -E tee /etc/exports <<-EOF
+	/opt/redcloud/data      *(rw,all_squash,anonuid=$(id -u redcloud),anongid=$(id -g redcloud),no_subtree_check)
+	EOF
+    fi
+
+    if ! sudo exportfs -s | grep "/opt/redcloud/data" -q; then
+      sudo exportfs -a
+    fi
+
+    if ! systemctl is-active nfs-kernel-server.service -q; then
+      sudo systemctl restart nfs-kernel-server.service
+    fi
