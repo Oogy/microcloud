@@ -1,21 +1,21 @@
-{{- if .Values.nfsSetup.enabled }}
+{{- if .Values.nfsSetupEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-nfs-setup
-  namespace: {{ default .Release.Namespace .Values.nfsSetup.namespace }}
+  namespace: {{ default .Release.Namespace .Values.nfsSetupNamespace }}
 data:
   nfs.sh: |
     #!/usr/bin/env bash
 
     set -x
 
-    NFS_USER="{{ .Values.nfsSetup.user }}"
-    NFS_GROUP="{{ .Values.nfsSetup.group }}"
-    EXPORT_PATH="{{ .Values.nfsSetup.exportPath }}"
-    MOUNT_PATH="{{ .Values.nfsSetup.mountPath }}"
-    CONF_PATH="/etc/nfs.conf.d/{{ .Values.nfsSetup.confName }}.conf"
-    EXPORT_OPTS="{{ .Values.nfsSetup.exportOptions }}"
+    NFS_USER="{{ .Values.nfsSetupUser }}"
+    NFS_GROUP="{{ .Values.nfsSetupGroup }}"
+    EXPORT_PATH="{{ .Values.nfsSetupExportPath }}"
+    MOUNT_PATH="{{ .Values.nfsSetupMountPath }}"
+    CONF_PATH="/etc/nfs.conf.d/{{ .Values.nfsSetupConfName }}.conf"
+    EXPORT_OPTS="{{ .Values.nfsSetupExportOptions }}"
 
     apt -y install nfs-kernel-server nfs-common rpcbind
 

@@ -160,13 +160,12 @@ tolerations: []
 
 affinity: {}
 
-nfsSetup:
-  enabled: false
-  namespace: microcloud
-  image: alpine:3.19
-  user: nfs
-  group: nfs
-  exportPath: /opt/nfs/data
-  mountPath: /mnt/nfs/data
-  exportOptions: "*(rw,all_squash,anonuid=65534,anongid=65534,no_subtree_check)"
-  confName: nfs-setup
+nfsSetupEnabled: false
+nfsSetupNamespace: microcloud
+nfsSetupImage: alpine:3.19
+nfsSetupUser: nfs
+nfsSetupGroup: nfs
+nfsSetupExportPath: /opt/nfs/data
+nfsSetupMountPath: /mnt/nfs/data
+nfsSetupExportOptions: "*(rw,all_squash,anonuid=65534,anongid=65534,no_subtree_check)"
+nfsSetupConfName: nfs-setup
