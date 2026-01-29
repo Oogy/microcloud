@@ -166,7 +166,7 @@ nfsSetup:
   image: alpine:3.19
   user: nfs
   group: nfs
-  exportPath: /opt/storage/nfs/data
-  mountPath: /mnt/storage/nfs/data
+  exportPath: /opt/nfs/data
+  mountPath: /mnt/nfs/data
   exportOptions: "*(rw,all_squash,anonuid=65534,anongid=65534,no_subtree_check)"
   confName: nfs-setup
