@@ -1,4 +1,3 @@
-{{- if .Values.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -37,4 +36,3 @@ spec:
         - name: nfs-setup
           configMap:
             name: {{ .Release.Name }}-nfs-setup
-{{- end }}
