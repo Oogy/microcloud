@@ -1,9 +1,9 @@
-{{- if .Values.nfsSetupEnabled }}
+{{- if .Values.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}-nfs-setup
-  namespace: {{ default .Release.Namespace .Values.nfsSetupNamespace }}
+  namespace: {{ default .Release.Namespace .Values.namespace }}
 spec:
   backoffLimit: 3
   template:
@@ -13,7 +13,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: nfs-setup
-          image: {{ .Values.nfsSetupImage | quote }}
+          image: {{ .Values.image | quote }}
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
