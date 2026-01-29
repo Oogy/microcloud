@@ -41,14 +41,14 @@ data:
 
     if [ ! -f "${CONF_PATH}" ]; then
       tee "${CONF_PATH}" <<-EOF
-	[nfsd]
-	vers3=n
-	host=127.0.0.1
+    [nfsd]
+    vers3=n
+    host=127.0.0.1
 
-	[mountd]
-	manage-gids=y
-	port=${MOUNTD_PORT}
-	EOF
+    [mountd]
+    manage-gids=y
+    port=${MOUNTD_PORT}
+    EOF
     fi
 
     if ! id "${NFS_USER}"; then
@@ -77,8 +77,8 @@ data:
 
     if ! grep -q "${EXPORT_PATH}" /etc/exports; then
       tee /etc/exports <<-EOF
-	${EXPORT_PATH} ${EXPORT_OPTS}
-	EOF
+    ${EXPORT_PATH} ${EXPORT_OPTS}
+    EOF
     fi
 
     if ! exportfs -s | grep "${EXPORT_PATH}" -q; then
