@@ -1,8 +1,9 @@
+{{- if .Values.nfsSetup.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: nfs-setup
-  namespace: microcloud
+  name: {{ .Release.Name }}-nfs-setup
+  namespace: {{ default .Release.Namespace .Values.nfsSetup.namespace }}
 spec:
   backoffLimit: 3
   template:
@@ -12,7 +13,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: nfs-setup
-          image: alpine:3.19
+          image: {{ .Values.nfsSetup.image | quote }}
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
@@ -21,8 +22,8 @@ spec:
             - -c
             - |
               apk add --no-cache util-linux >/dev/null
-              install -m 0755 /opt/nfs-setup/nfs.sh /host/tmp/microcloud-nfs-setup.sh
-              nsenter --target 1 --uts --mount -- /bin/sh -c "chroot /host /bin/bash /tmp/microcloud-nfs-setup.sh"
+              install -m 0755 /opt/nfs-setup/nfs.sh /host/tmp/nfs-setup.sh
+              nsenter --target 1 --uts --mount -- /bin/sh -c "chroot /host /bin/bash /tmp/nfs-setup.sh"
           volumeMounts:
             - name: host-root
               mountPath: /host
@@ -35,4 +36,5 @@ spec:
             type: Directory
         - name: nfs-setup
           configMap:
-            name: nfs-setup
+            name: {{ .Release.Name }}-nfs-setup
+{{- end }}
