@@ -2,4 +2,11 @@ csi-driver-nfs:
   controller:
     runOnMaster: true
     runOnControlPlane: true
+    nodeSelector:
+      kubernetes.io/os: linux
+      node-role.kubernetes.io/control-plane: "true"
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
   kubeletDir: /var/lib/k0s/kubelet
