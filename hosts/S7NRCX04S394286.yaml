@@ -2,3 +2,5 @@ hostname: sidearm
 apps:
   - name: base
     values: {}
+  - name: csi-driver-nfs
+    values: {}
