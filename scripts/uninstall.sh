@@ -28,19 +28,23 @@ remove_microcloud_units() {
   stop_disable_unit microcloud-appset.service
   stop_disable_unit microcloud-argocd.service
   stop_disable_unit microcloud-k8s.service
+  stop_disable_unit microcloud-nfs.service
   stop_disable_unit microcloud-host.service
   stop_disable_unit microcloud-appset.target
   stop_disable_unit microcloud-argocd.target
   stop_disable_unit microcloud-k8s.target
+  stop_disable_unit microcloud-nfs.target
   stop_disable_unit microcloud-host.target
 
   remove_unit microcloud-appset.service
   remove_unit microcloud-argocd.service
   remove_unit microcloud-k8s.service
+  remove_unit microcloud-nfs.service
   remove_unit microcloud-host.service
   remove_unit microcloud-appset.target
   remove_unit microcloud-argocd.target
   remove_unit microcloud-k8s.target
+  remove_unit microcloud-nfs.target
   remove_unit microcloud-host.target
   systemctl daemon-reload
 }
@@ -49,6 +53,7 @@ remove_done_files() {
   rm -f /var/lib/microcloud/appset.done
   rm -f /var/lib/microcloud/argocd.done
   rm -f /var/lib/microcloud/k8s.done
+  rm -f /var/lib/microcloud/nfs.done
   rm -f /var/lib/microcloud/host.done
   rmdir /var/lib/microcloud 2>/dev/null || true
 }
@@ -82,11 +87,16 @@ remove_binaries() {
   rm -f /usr/local/bin/microcloud-k8s
   rm -f /usr/local/bin/microcloud-argocd
   rm -f /usr/local/bin/microcloud-appset
+  rm -f /usr/local/bin/microcloud-nfs
   rm -f /usr/local/bin/k0s
 }
 
 remove_host_data() {
   rm -rf /usr/local/share/microcloud
+}
+
+remove_nfs_config() {
+  rm -f /etc/exports.d/microcloud-nfs.exports
 }
 
 main() {
@@ -95,6 +105,7 @@ main() {
   stop_and_reset_k0s
   remove_microcloud_units
   remove_done_files
+  remove_nfs_config
   remove_k0s_data
   remove_binaries
   remove_host_data

@@ -56,13 +56,48 @@ install_microcloud_k8s_script() {
   install -m 0755 "${script_dir}/microcloud-k8s" /usr/local/bin/microcloud-k8s
 }
 
+install_microcloud_nfs_script() {
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  install -m 0755 "${script_dir}/microcloud-nfs" /usr/local/bin/microcloud-nfs
+}
+
+install_microcloud_nfs_service() {
+  cat > /etc/systemd/system/microcloud-nfs.service <<'EOF'
+[Unit]
+Description=Microcloud NFS host setup
+ConditionPathExists=!/var/lib/microcloud/nfs.done
+After=network-online.target microcloud-host.target
+Wants=network-online.target microcloud-host.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/microcloud-nfs
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+install_microcloud_nfs_target() {
+  cat > /etc/systemd/system/microcloud-nfs.target <<'EOF'
+[Unit]
+Description=Microcloud NFS host setup complete
+ConditionPathExists=/var/lib/microcloud/nfs.done
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
 install_microcloud_k8s_service() {
   cat > /etc/systemd/system/microcloud-k8s.service <<'EOF'
 [Unit]
 Description=Microcloud k0s bootstrap
 ConditionPathExists=!/var/lib/microcloud/k8s.done
-After=network-online.target microcloud-host.target
-Wants=network-online.target microcloud-host.target
+After=network-online.target microcloud-host.target microcloud-nfs.target
+Wants=network-online.target microcloud-host.target microcloud-nfs.target
 
 [Service]
 Type=oneshot
@@ -161,6 +196,7 @@ reload_systemd() {
 
 enable_service() {
   systemctl enable microcloud-host.service
+  systemctl enable microcloud-nfs.service
   systemctl enable microcloud-k8s.service
   systemctl enable microcloud-argocd.service
   systemctl enable microcloud-appset.service
@@ -168,6 +204,7 @@ enable_service() {
 
 start_services_now() {
   systemctl start microcloud-host.service
+  systemctl start microcloud-nfs.service
   systemctl start microcloud-k8s.service
   systemctl start microcloud-argocd.service
   systemctl start microcloud-appset.service
@@ -196,6 +233,9 @@ main() {
   install_microcloud_host_service
   install_microcloud_host_target
   install_hosts_data
+  install_microcloud_nfs_script
+  install_microcloud_nfs_service
+  install_microcloud_nfs_target
   install_microcloud_k8s_script
   install_microcloud_k8s_service
   install_microcloud_k8s_target

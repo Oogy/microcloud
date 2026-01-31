@@ -2,5 +2,3 @@ hostname: sidearm
 apps:
   - name: base
     values: {}
-  - name: nfs
-    values: {}

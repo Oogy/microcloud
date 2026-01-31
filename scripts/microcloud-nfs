@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+NFS_USER="microcloud-nfs"
+NFS_GROUP="microcloud-nfs"
+EXPORT_PATH="/opt/microcloud/nfs/data"
+EXPORTS_FILE="/etc/exports.d/microcloud-nfs.exports"
+EXPORT_OPTS="*(rw,all_squash,anonuid=65534,anongid=65534,no_subtree_check)"
+
+ensure_root() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "error: run as root" >&2
+    exit 1
+  fi
+}
+
+detect_pkg_manager() {
+  if command -v apt-get >/dev/null 2>&1; then
+    echo "apt"
+    return 0
+  fi
+  if command -v dnf >/dev/null 2>&1; then
+    echo "dnf"
+    return 0
+  fi
+  if command -v yum >/dev/null 2>&1; then
+    echo "yum"
+    return 0
+  fi
+  if command -v pacman >/dev/null 2>&1; then
+    echo "pacman"
+    return 0
+  fi
+  if command -v apk >/dev/null 2>&1; then
+    echo "apk"
+    return 0
+  fi
+  return 1
+}
+
+install_packages() {
+  local mgr
+  mgr="$(detect_pkg_manager || true)"
+  case "${mgr}" in
+    apt)
+      apt-get update -y
+      apt-get install -y nfs-kernel-server nfs-common rpcbind
+      ;;
+    dnf)
+      dnf install -y nfs-utils rpcbind
+      ;;
+    yum)
+      yum install -y nfs-utils rpcbind
+      ;;
+    pacman)
+      pacman -Sy --noconfirm nfs-utils
+      ;;
+    apk)
+      apk add --no-cache nfs-utils
+      ;;
+    *)
+      echo "error: unsupported package manager" >&2
+      exit 1
+      ;;
+  esac
+}
+
+ensure_group() {
+  if getent group "${NFS_GROUP}" >/dev/null 2>&1; then
+    return 0
+  fi
+  groupadd --system "${NFS_GROUP}"
+}
+
+ensure_user() {
+  if id "${NFS_USER}" >/dev/null 2>&1; then
+    return 0
+  fi
+  useradd --system --no-create-home --home-dir /var/lib/microcloud/nfs --shell /usr/sbin/nologin -g "${NFS_GROUP}" "${NFS_USER}"
+}
+
+ensure_export_path() {
+  if [[ -d "${EXPORT_PATH}" ]]; then
+    return 0
+  fi
+  mkdir -p "${EXPORT_PATH}"
+  chown -R "${NFS_USER}:${NFS_GROUP}" "/opt/microcloud"
+}
+
+write_exports() {
+  mkdir -p /etc/exports.d
+  cat > "${EXPORTS_FILE}" <<EOF
+${EXPORT_PATH} ${EXPORT_OPTS}
+EOF
+}
+
+reload_exports() {
+  if command -v exportfs >/dev/null 2>&1; then
+    exportfs -ra
+  fi
+}
+
+get_nfs_service() {
+  if systemctl cat nfs-kernel-server.service >/dev/null 2>&1; then
+    echo "nfs-kernel-server.service"
+    return 0
+  fi
+  if systemctl cat nfs-server.service >/dev/null 2>&1; then
+    echo "nfs-server.service"
+    return 0
+  fi
+  return 1
+}
+
+enable_rpcbind() {
+  if systemctl cat rpcbind.service >/dev/null 2>&1; then
+    systemctl enable --now rpcbind.service
+    return 0
+  fi
+  if systemctl cat rpcbind.socket >/dev/null 2>&1; then
+    systemctl enable --now rpcbind.socket
+    return 0
+  fi
+}
+
+enable_nfs() {
+  local svc
+  svc="$(get_nfs_service || true)"
+  if [[ -z "${svc}" ]]; then
+    echo "error: nfs service not found after install" >&2
+    exit 1
+  fi
+  systemctl enable --now "${svc}"
+}
+
+mark_complete() {
+  mkdir -p /var/lib/microcloud
+  touch /var/lib/microcloud/nfs.done
+  systemctl daemon-reload
+  systemctl enable --now microcloud-nfs.target
+}
+
+main() {
+  ensure_root
+
+  if [[ -f /var/lib/microcloud/nfs.done ]]; then
+    exit 0
+  fi
+
+  install_packages
+  ensure_group
+  ensure_user
+  ensure_export_path
+  write_exports
+  reload_exports
+  enable_rpcbind
+  enable_nfs
+  mark_complete
+}
+
+main "$@"
