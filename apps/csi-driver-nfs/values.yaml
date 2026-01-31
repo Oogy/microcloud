@@ -10,3 +10,14 @@ csi-driver-nfs:
         operator: Exists
         effect: NoSchedule
   kubeletDir: /var/lib/k0s/kubelet
+  storageClass:
+    create: true
+    name: nfs-csi
+    annotations:
+      storageclass.kubernetes.io/is-default-class: "true"
+    server: 127.0.0.1
+    share: /opt/microcloud/nfs/data
+    reclaimPolicy: Delete
+    volumeBindingMode: Immediate
+    mountOptions:
+      - nfsvers=4
