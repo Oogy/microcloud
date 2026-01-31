@@ -22,7 +22,7 @@ spec:
             - |
               apk add --no-cache util-linux >/dev/null
               install -m 0755 /opt/nfs-setup/nfs.sh /host/tmp/nfs-setup.sh
-              nsenter --target 1 --uts --mount -- /bin/sh -c "chroot /host /bin/bash /tmp/nfs-setup.sh"
+              nsenter --target 1 --uts --mount -- /bin/bash /tmp/nfs-setup.sh
           volumeMounts:
             - name: host-root
               mountPath: /host
