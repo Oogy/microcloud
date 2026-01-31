@@ -2,3 +2,4 @@ csi-driver-nfs:
   controller:
     runOnMaster: true
     runOnControlPlane: true
+  kubeletDir: /var/lib/k0s/kubelet
