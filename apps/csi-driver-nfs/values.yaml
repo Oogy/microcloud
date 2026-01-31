@@ -1,6 +1,6 @@
 csi-driver-nfs:
   controller:
-    runOnMaster: true
+    runOnMaster: false
     runOnControlPlane: true
     nodeSelector:
       kubernetes.io/os: linux
