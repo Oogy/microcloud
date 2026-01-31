@@ -118,6 +118,12 @@ get_nfs_service() {
 }
 
 enable_rpcbind() {
+  if systemctl is-enabled rpcbind.service >/dev/null 2>&1 && [[ "$(systemctl is-enabled rpcbind.service)" == "masked" ]]; then
+    systemctl unmask rpcbind.service
+  fi
+  if systemctl is-enabled rpcbind.socket >/dev/null 2>&1 && [[ "$(systemctl is-enabled rpcbind.socket)" == "masked" ]]; then
+    systemctl unmask rpcbind.socket
+  fi
   if systemctl cat rpcbind.service >/dev/null 2>&1; then
     systemctl enable --now rpcbind.service
     return 0
