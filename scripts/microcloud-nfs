@@ -14,52 +14,57 @@ ensure_root() {
   fi
 }
 
-detect_pkg_manager() {
-  if command -v apt-get >/dev/null 2>&1; then
-    echo "apt"
-    return 0
+read_os_release() {
+  if [[ -r /etc/os-release ]]; then
+    # shellcheck source=/etc/os-release
+    . /etc/os-release
   fi
-  if command -v dnf >/dev/null 2>&1; then
-    echo "dnf"
-    return 0
-  fi
-  if command -v yum >/dev/null 2>&1; then
-    echo "yum"
-    return 0
-  fi
-  if command -v pacman >/dev/null 2>&1; then
-    echo "pacman"
-    return 0
-  fi
-  if command -v apk >/dev/null 2>&1; then
-    echo "apk"
-    return 0
-  fi
-  return 1
+  OS_ID="${ID:-}"
+  OS_LIKE="${ID_LIKE:-}"
+}
+
+detect_distro() {
+  read_os_release
+  case "${OS_ID}" in
+    arch) echo "arch" ;;
+    ubuntu|debian) echo "debian" ;;
+    rhel|centos|rocky|almalinux|fedora) echo "rhel" ;;
+    alpine) echo "alpine" ;;
+    *) 
+      if [[ "${OS_LIKE}" == *"debian"* ]]; then
+        echo "debian"
+      elif [[ "${OS_LIKE}" == *"rhel"* || "${OS_LIKE}" == *"fedora"* ]]; then
+        echo "rhel"
+      else
+        echo "unknown"
+      fi
+      ;;
+  esac
 }
 
 install_packages() {
-  local mgr
-  mgr="$(detect_pkg_manager || true)"
-  case "${mgr}" in
-    apt)
+  local distro
+  distro="$(detect_distro)"
+  case "${distro}" in
+    debian)
       apt-get update -y
       apt-get install -y nfs-kernel-server nfs-common rpcbind
       ;;
-    dnf)
-      dnf install -y nfs-utils rpcbind
+    rhel)
+      if command -v dnf >/dev/null 2>&1; then
+        dnf install -y nfs-utils rpcbind
+      else
+        yum install -y nfs-utils rpcbind
+      fi
       ;;
-    yum)
-      yum install -y nfs-utils rpcbind
+    arch)
+      pacman -Sy --noconfirm nfs-utils rpcbind
       ;;
-    pacman)
-      pacman -Sy --noconfirm nfs-utils
-      ;;
-    apk)
-      apk add --no-cache nfs-utils
+    alpine)
+      apk add --no-cache nfs-utils rpcbind
       ;;
     *)
-      echo "error: unsupported package manager" >&2
+      echo "error: unsupported distro (ID=${OS_ID:-unknown} ID_LIKE=${OS_LIKE:-unknown})" >&2
       exit 1
       ;;
   esac
